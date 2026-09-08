@@ -7,6 +7,7 @@ using exam_system.Persistence;
 using exam_system.Persistence.Context;
 using exam_system.Persistence.DataAccess;
 using exam_system.Common.Services;
+using exam_system.Common.Behaviors;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,12 +17,10 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddPersistenceServices(builder.Configuration);
 
-builder.Services.AddMediatR(cfg =>
-{
-    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-});
+builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IEmailService, EmailService>();

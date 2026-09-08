@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using exam_system.Features.Identity.Register.Commands;
+using exam_system.Features.Shared;
 
 namespace exam_system.Features.Identity.Register.Controllers;
 
@@ -16,15 +17,14 @@ public class RegisterController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(EndpointResponse<RegisterResponse>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(EndpointResponse<RegisterResponse>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(EndpointResponse<RegisterResponse>), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register([FromBody] RegisterStudentCommand command, CancellationToken ct)
     {
         var result = await _mediator.Send(command, ct);
+        var response = EndpointResponse<RegisterResponse>.FromResult(result);
 
-        if (!result.Success)
-        {
-            return StatusCode(result.StatusCode, result);
-        }
-
-        return StatusCode(result.StatusCode, result);
+        return StatusCode(response.StatusCode, response);
     }
 }
