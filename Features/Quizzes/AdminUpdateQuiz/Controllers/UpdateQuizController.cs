@@ -11,7 +11,7 @@ namespace exam_system.Features.Quizzes.AdminCreateQuiz.Controllers;
 [Route("api/quizzes")]
 public class UpdateQuizController(IMediator mediator) : ControllerBase
 {
-    [HttpPut("{id:guid}")]
+    [HttpPatch("{id:guid}")]
     public async Task<IActionResult> Update(
         Guid id,
         UpdateQuizDto updateQuizDto,

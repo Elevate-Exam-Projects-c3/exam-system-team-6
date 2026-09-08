@@ -33,6 +33,18 @@ public class UpdateQuizCommandHandler(IGenericRepository<Quiz> repository, IUnit
         if (request.UpdateQuizDto.MaxAttempts.HasValue)
             quiz.MaxAttempts = request.UpdateQuizDto.MaxAttempts.Value;
         
+        var startDate = request.UpdateQuizDto.StartDate ?? quiz.StartDate;
+        var endDate = request.UpdateQuizDto.EndDate ?? quiz.EndDate;
+        
+        if (startDate >= endDate)
+        {
+            return RequestResponse.Fail(
+                "Start date must be before end date.",
+                400);
+        }
+        quiz.StartDate = startDate;
+        quiz.EndDate = endDate;
+        
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return RequestResponse.Ok(

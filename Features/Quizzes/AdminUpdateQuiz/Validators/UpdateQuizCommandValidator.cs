@@ -25,5 +25,23 @@ public class UpdateQuizCommandValidator : AbstractValidator<UpdateQuizCommand>
         RuleFor(x => x.UpdateQuizDto.MaxAttempts)
             .GreaterThan(0).When(x => x.UpdateQuizDto.MaxAttempts.HasValue)
             .WithMessage("Max attempts must be greater than 0.");
+        
+        RuleFor(x => x.UpdateQuizDto.StartDate)
+            .Must(startDate => startDate > DateTime.UtcNow)
+            .When(x => x.UpdateQuizDto.StartDate.HasValue)
+            .WithMessage("Start date must be in the future.");
+        
+        RuleFor(x => x.UpdateQuizDto.EndDate)
+            .Must(endDate => endDate > DateTime.UtcNow)
+            .When(x => x.UpdateQuizDto.EndDate.HasValue)
+            .WithMessage("End date must be in the future.");
+        
+        RuleFor(x => x.UpdateQuizDto.StartDate)
+            .LessThan(x => x.UpdateQuizDto.EndDate)
+            .When(x =>
+                x.UpdateQuizDto.StartDate.HasValue &&
+                x.UpdateQuizDto.EndDate.HasValue)
+            .WithMessage("Start date must be before end date.");
+
     }
 }

@@ -7,4 +7,8 @@ public class UpdateQuizDto
     public int? DurationMinutes { get; set; }
     public int? PassScore { get; set; } 
     public int? MaxAttempts { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    
+    
 }

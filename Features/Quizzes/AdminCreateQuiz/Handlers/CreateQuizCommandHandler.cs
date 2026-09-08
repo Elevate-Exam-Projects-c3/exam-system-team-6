@@ -16,7 +16,10 @@ public class CreateQuizCommandHandler(IGenericRepository<Quiz> repository, IUnit
             Instructions = request.CreateQuizDto.Instructions,
             DurationMinutes = request.CreateQuizDto.DurationMinutes, 
             PassScore = request.CreateQuizDto.PassScore ?? 60, 
-            MaxAttempts = request.CreateQuizDto.MaxAttempts}; 
+            MaxAttempts = request.CreateQuizDto.MaxAttempts,
+            StartDate = request.CreateQuizDto.StartDate,
+            EndDate = request.CreateQuizDto.EndDate
+        }; 
         
         await repository.AddAsync(quiz);
         await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -20,5 +20,14 @@ public class CreateQuizValidator : AbstractValidator<CreateQuizCommand>
         RuleFor(x => x.CreateQuizDto.MaxAttempts)
             .GreaterThan(0).When(x => x.CreateQuizDto.MaxAttempts.HasValue)
             .WithMessage("Max attempts must be greater than 0.");
+        
+        RuleFor(x => x.CreateQuizDto.StartDate)
+            .LessThan(x => x.CreateQuizDto.EndDate)
+            .WithMessage("Start date must be before end date.");
+        
+        RuleFor(x => x.CreateQuizDto.StartDate)
+            .Must(startDate => startDate > DateTime.UtcNow)
+            .WithMessage("Start date must be in the future.");
+            
     }
 }
