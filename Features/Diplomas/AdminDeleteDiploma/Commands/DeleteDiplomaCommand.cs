@@ -3,7 +3,4 @@ using MediatR;
 
 namespace exam_system.Features.Diplomas.AdminDeleteDiploma.Commands;
 
-public class DeleteDiplomaCommand : IRequest<RequestResponse>
-{
-    public Guid DiplomaId { get; set; }
-}
+public record DeleteDiplomaCommand(Guid DiplomaId) : IRequest<RequestResponse>;

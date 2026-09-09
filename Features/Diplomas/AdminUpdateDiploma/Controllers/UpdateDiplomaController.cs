@@ -20,21 +20,19 @@ public class UpdateDiplomaController : ControllerBase
     }
     
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<EndpointResponse<UpdateDiplomaDto>>> UpdateDiploma(
+    public async Task<ActionResult<EndpointResponse<Guid>>> UpdateDiploma(
         Guid id,
         [FromBody] UpdateDiplomaRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateDiplomaCommand
-        {
-            Id = id,
-            Title = request.Title,
-            Description = request.Description
-        };
+        var command = new UpdateDiplomaCommand(
+            id,
+            request.Title,
+            request.Description);
 
         var result = await _mediator.Send(command, cancellationToken);
 
-        var response = EndpointResponse<UpdateDiplomaDto>.FromResult(result);
+        var response = EndpointResponse<Guid>.FromResult(result);
 
         return StatusCode(response.StatusCode, response);
     }

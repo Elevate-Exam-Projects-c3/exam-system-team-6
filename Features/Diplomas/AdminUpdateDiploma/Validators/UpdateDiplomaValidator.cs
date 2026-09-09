@@ -1,5 +1,4 @@
 using exam_system.Features.Diplomas.AdminUpdateDiploma.Commands;
-using exam_system.Features.Diplomas.AdminUpdateDiploma.Dtos;
 using FluentValidation;
 
 namespace exam_system.Features.Diplomas.AdminUpdateDiploma.Validators;

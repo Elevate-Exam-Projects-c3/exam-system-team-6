@@ -3,9 +3,7 @@ using MediatR;
 
 namespace exam_system.Features.Diplomas.AdminCreateDiploma.Commands;
 
-public class CreateDiplomaCommand : IRequest<RequestResponse<Guid>>
-{
-    public string Title { get; set; } = null!;
-
-    public string? Description { get; set; }
-}
+public record CreateDiplomaCommand(
+    string Title,
+    string? Description
+) : IRequest<RequestResponse<Guid>>;
