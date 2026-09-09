@@ -1,12 +1,23 @@
 namespace exam_system.Features.Shared;
 
-public class EndpointResponse<T> : ApiResponse<T>
+public class EndpointResponse<T>
 {
+    public bool Success { get; set; }
+    public int StatusCode { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public T? Data { get; set; }
+    public IDictionary<string, string[]>? Errors { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public EndpointResponse() { }
 
     public EndpointResponse(bool success, int statusCode, string message, T? data = default, IDictionary<string, string[]>? errors = null)
-        : base(success, statusCode, message, data, errors)
     {
+        Success = success;
+        StatusCode = statusCode;
+        Message = message;
+        Data = data;
+        Errors = errors;
+        Timestamp = DateTime.UtcNow;
     }
 
     public static EndpointResponse<T> FromResult(RequestResponse<T> result)
@@ -21,8 +32,14 @@ public class EndpointResponse<T> : ApiResponse<T>
     }
 }
 
-public class EndpointResponse : ApiResponse
+public class EndpointResponse
 {
+    public bool Success { get; set; }
+    public int StatusCode { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public IDictionary<string, string[]>? Errors { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+    
     public static EndpointResponse FromResult(RequestResponse result)
     {
         return new EndpointResponse
