@@ -1,6 +1,7 @@
 namespace exam_system.Features.Shared;
 
 public class EndpointResponse<T> 
+
 {
     public bool Success { get; set; }
     public int StatusCode { get; set; }
@@ -40,8 +41,16 @@ public class EndpointResponse<T>
         => new(false, statusCode, message, default, errors);
 }
 
+
 public class EndpointResponse : EndpointResponse<object>
+
 {
+    public bool Success { get; set; }
+    public int StatusCode { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public IDictionary<string, string[]>? Errors { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+    
     public static EndpointResponse FromResult(RequestResponse result)
     {
         return new EndpointResponse

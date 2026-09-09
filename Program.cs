@@ -1,4 +1,5 @@
 using System.Reflection;
+using exam_system.Common.Behaviors;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
