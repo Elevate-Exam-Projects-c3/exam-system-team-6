@@ -22,19 +22,29 @@ public class ValidationBehavior<TRequest, TResponse>
         if (_validators.Any())
         {
             var context = new ValidationContext<TRequest>(request);
-
-            var results = await Task.WhenAll(
-                _validators.Select(v =>
-                    v.ValidateAsync(context, cancellationToken))
-            );
-
-            var failures = results
-                .SelectMany(r => r.Errors)
-                .Where(f => f != null)
-                .ToList();
+            var validationResults = await Task.WhenAll(_validators.Select(v => v.ValidateAsync(context, cancellationToken)));
+            var failures = validationResults.SelectMany(r => r.Errors).Where(f => f != null).ToList();
 
             if (failures.Count != 0)
+            {
+                var errors = failures
+                    .GroupBy(e => e.PropertyName, e => e.ErrorMessage)
+                    .ToDictionary(g => g.Key, g => g.ToArray());
+
+                if (typeof(TResponse).IsGenericType && typeof(TResponse).GetGenericTypeDefinition() == typeof(RequestResponse<>))
+                {
+                    var failMethod = typeof(TResponse).GetMethod(
+                        nameof(RequestResponse<object>.Fail),
+                        new[] { typeof(string), typeof(int), typeof(IDictionary<string, string[]>) });
+
+                    if (failMethod != null)
+                    {
+                        return (TResponse)failMethod.Invoke(null, new object[] { "Validation failed", 400, errors })!;
+                    }
+                }
+
                 throw new ValidationException(failures);
+            }
         }
 
         return await next();

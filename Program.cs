@@ -7,6 +7,9 @@ using exam_system.Domain.Entities.Diplomas;
 using exam_system.Persistence;
 using exam_system.Persistence.Context;
 using exam_system.Persistence.DataAccess;
+using exam_system.Common.Services;
+using exam_system.Common.Behaviors;
+using exam_system.Features.Identity.Register.Orchestrators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +26,12 @@ builder.Services.AddMediatR(cfg =>
 });
 
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton<IOtpService, OtpService>();
+builder.Services.AddScoped<RegisterStudentOrchestrator>();
 
 var app = builder.Build();
 
