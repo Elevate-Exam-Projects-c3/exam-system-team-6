@@ -6,25 +6,19 @@ using exam_system.Features.Shared;
 namespace exam_system.Features.Identity.Register.Controllers;
 
 [ApiController]
-[Route("api/identity/[controller]")]
-public class RegisterController : ControllerBase
+[Route("api/identity/register")]
+public class RegisterController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public RegisterController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     [HttpPost]
-    [ProducesResponseType(typeof(EndpointResponse<RegisterResponse>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(EndpointResponse<RegisterResponse>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(EndpointResponse<RegisterResponse>), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Register([FromBody] RegisterStudentCommand command, CancellationToken ct)
+    public async Task<IActionResult> Register(
+        RegisterStudentCommand command,
+        CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(command, ct);
-        var response = EndpointResponse<RegisterResponse>.FromResult(result);
+        var result = await mediator.Send(command, cancellationToken);
 
-        return StatusCode(response.StatusCode, response);
+        return StatusCode(
+            result.StatusCode,
+            EndpointResponse<RegisterResponse>.FromResult(result)
+        );
     }
 }

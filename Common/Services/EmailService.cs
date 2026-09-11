@@ -26,10 +26,12 @@ public class EmailService : IEmailService
 
         message.Body = new TextPart("html") { Text = body };
 
+        var port = int.TryParse(_configuration["Smtp:Port"], out var parsedPort) ? parsedPort : 25;
+
         using var client = new SmtpClient();
         await client.ConnectAsync(
             _configuration["Smtp:Host"] ?? "localhost",
-            int.Parse(_configuration["Smtp:Port"] ?? "25"),
+            port,
             MailKit.Security.SecureSocketOptions.Auto);
 
         if (!string.IsNullOrEmpty(_configuration["Smtp:Username"]))
