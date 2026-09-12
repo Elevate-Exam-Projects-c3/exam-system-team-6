@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using exam_system.Features.Shared;
+using FluentValidation;
 using MediatR;
 
 namespace exam_system.Common.Behaviors;
@@ -16,8 +17,8 @@ public class ValidationBehavior<TRequest, TResponse>
 
     public async Task<TResponse> Handle(
         TRequest request,
-        RequestHandlerDelegate<TResponse> next,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        RequestHandlerDelegate<TResponse> next)
     {
         if (_validators.Any())
         {
