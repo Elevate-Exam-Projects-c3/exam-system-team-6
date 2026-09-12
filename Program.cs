@@ -18,7 +18,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<BrowseDiplomasOrchestrator>();
+builder.Services.AddScoped<BrowseDiplomasOrchestratorHandler>();
 builder.Services.AddScoped<IUserContext, UserContext>();
 
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());

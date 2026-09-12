@@ -8,7 +8,7 @@ public class BrowseDiplomaDto
 
     public string? Description { get; init; }
 
-    public int CompletedQuizzes { get; init; }
+    public int CompletedQuizzes { get; set; }
 
     public int TotalQuizzes { get; init; }
 }

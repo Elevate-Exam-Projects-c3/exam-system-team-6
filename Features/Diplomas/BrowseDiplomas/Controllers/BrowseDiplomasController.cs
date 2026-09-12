@@ -1,4 +1,5 @@
 using exam_system.Features.Diplomas.BrowseDiplomas.Dtos;
+using exam_system.Features.Diplomas.BrowseDiplomas.Orchestrators;
 using exam_system.Features.Diplomas.BrowseDiplomas.Queries;
 using exam_system.Features.Shared;
 using MediatR;
@@ -22,16 +23,24 @@ public class BrowseDiplomasController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<
         EndpointResponse<PaginatedResult<BrowseDiplomaDto>>>> Browse(
-        [FromQuery] BrowseDiplomasQuery query,
-        CancellationToken cancellationToken)
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(query, cancellationToken);
+        var request = new BrowseDiplomasOrchestrator(
+            pageIndex,
+            pageSize);
+
+        var result = await _mediator.Send(
+            request,
+            cancellationToken);
 
         var response =
             EndpointResponse<PaginatedResult<BrowseDiplomaDto>>
                 .FromResult(result);
 
-        return StatusCode(response.StatusCode, response);
+        return StatusCode(
+            response.StatusCode,
+            response);
     }
-    
 }

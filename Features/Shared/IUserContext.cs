@@ -1,6 +1,6 @@
 namespace exam_system.Features.Shared;
 
-public class IUserContext
+public interface IUserContext
 {
-    public Guid GetUserId { get; set; }
+    public Guid GetUserId();
 }
