@@ -12,7 +12,7 @@ using exam_system.Persistence.DataAccess;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddScoped<DeleteDiplomaOrchestrator>();
+builder.Services.AddScoped<DeleteDiplomaOrchestratorHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
