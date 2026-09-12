@@ -1,4 +1,5 @@
 using exam_system.Features.Diplomas.EnrollDiploma.Commands;
+using exam_system.Features.Diplomas.EnrollDiploma.Orchestrators;
 using exam_system.Features.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace exam_system.Features.Diplomas.EnrollDiploma.Controllers;
 
 [ApiController]
-[Route("api/stident/diplomas")]
+[Route("api/student/diplomas")]
 //[Authorize(Roles = "Student")]
 public class EnrollDiplomaController : ControllerBase
 {
@@ -23,12 +24,17 @@ public class EnrollDiplomaController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        var command = new EnrollDiplomaCommand(id);
+        var request = new EnrollDiplomaOrchestrator(id);
 
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await _mediator.Send(
+            request,
+            cancellationToken);
 
-        var response = EndpointResponse<Guid>.FromResult(result);
+        var response =
+            EndpointResponse<Guid>.FromResult(result);
 
-        return StatusCode(response.StatusCode, response);
+        return StatusCode(
+            response.StatusCode,
+            response);
     }
 }
