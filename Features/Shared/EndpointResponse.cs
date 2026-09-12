@@ -1,6 +1,7 @@
 namespace exam_system.Features.Shared;
 
-public class EndpointResponse<T>
+public class EndpointResponse<T> 
+
 {
     public bool Success { get; set; }
     public int StatusCode { get; set; }
@@ -30,9 +31,19 @@ public class EndpointResponse<T>
             result.Errors
         );
     }
+    public static EndpointResponse<T> Ok(T data, string message = "Success", int statusCode = 200)
+        => new(true, statusCode, message, data);
+
+    public static EndpointResponse<T> Created(T data, string message = "Created successfully")
+        => new(true, 201, message, data);
+
+    public static EndpointResponse<T> Fail(string message, int statusCode = 400, IDictionary<string, string[]>? errors = null)
+        => new(false, statusCode, message, default, errors);
 }
 
-public class EndpointResponse
+
+public class EndpointResponse : EndpointResponse<object>
+
 {
     public bool Success { get; set; }
     public int StatusCode { get; set; }
@@ -51,4 +62,9 @@ public class EndpointResponse
             Timestamp = DateTime.UtcNow
         };
     }
+    public static EndpointResponse Ok(string message = "Success", int statusCode = 200)
+        => new() { Success = true, StatusCode = statusCode, Message = message };
+
+    public static new EndpointResponse Fail(string message, int statusCode = 400, IDictionary<string, string[]>? errors = null)
+        => new() { Success = false, StatusCode = statusCode, Message = message, Errors = errors };
 }
