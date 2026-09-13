@@ -2,6 +2,7 @@ using MediatR;
 using exam_system.Common.Enums;
 using exam_system.Common.Services;
 using exam_system.Features.Identity.VerifyEmailOtp;
+using exam_system.Features.Identity.VerifyEmailOtp.Commands;
 using exam_system.Features.Identity.VerifyEmailOtp.Orchestrators;
 using exam_system.Features.Identity.VerifyEmailOtp.Queries;
 using exam_system.Features.Shared;
@@ -79,12 +80,12 @@ public class VerifyEmailOtpOrchestratorHandler
             return RequestResponse<VerifyEmailOtpResponse>.Fail($"Invalid verification code. {remainingAttempts} attempt(s) remaining.", statusCode: 400);
         }
 
-        // 7. Success: Mark OTP as used and activate account
-        latestOtp.IsUsed = true;
-        user.EmailConfirmed = true;
-        user.AccountStatus = AccountStatus.Active;
-
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        // 7. Success: Dispatch sub-command to mark OTP as used and activate account
+        await _mediator.Send(new ActivateUserAccountCommand
+        {
+            UserId = user.Id,
+            OtpId = latestOtp.Id
+        }, cancellationToken);
 
         var responseData = new VerifyEmailOtpResponse
         {
