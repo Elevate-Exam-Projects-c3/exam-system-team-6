@@ -5,11 +5,13 @@ namespace exam_system.Features.Shared;
 public class UserContext : IUserContext
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    
+
+
     public UserContext(IHttpContextAccessor httpContextAccessor)
         {
         _httpContextAccessor = httpContextAccessor;
         }
+
 
     public Guid GetUserId()
     {
@@ -24,4 +26,6 @@ public class UserContext : IUserContext
 
         return parsedUserId;
     }
+
+
 }
