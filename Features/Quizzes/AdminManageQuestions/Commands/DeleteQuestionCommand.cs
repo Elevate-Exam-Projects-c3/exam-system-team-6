@@ -1,0 +1,6 @@
+﻿using exam_system.Features.Shared;
+using MediatR;
+
+namespace exam_system.Features.Quizzes.AdminManageQuestions.Commands;
+
+public record DeleteQuestionCommand(Guid QuizId, Guid QuestionId) : IRequest<RequestResponse>;
