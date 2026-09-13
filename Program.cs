@@ -8,7 +8,6 @@ using exam_system.Persistence.Context;
 using exam_system.Persistence.DataAccess;
 using exam_system.Common.Services;
 using exam_system.Common.Behaviors;
-using exam_system.Features.Identity.VerifyEmailOtp.Orchestrators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +24,6 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBeh
 
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<VerifyEmailOtpOrchestrator>();
 
 var app = builder.Build();
 
