@@ -18,39 +18,31 @@ public class JwtService : IJwtService
 
     public string GenerateAccessToken(Guid userId, string email, string role)
     {
-        var secret = _configuration["JwtSettings:Secret"]
+        var jwtSettings = _configuration.GetSection("JwtSettings");
+        var secret = jwtSettings["Secret"] ?? jwtSettings["Key"]
             ?? throw new InvalidOperationException("JwtSettings:Secret is not configured.");
-        var issuer = _configuration["JwtSettings:Issuer"] ?? "exam-system";
-        var audience = _configuration["JwtSettings:Audience"] ?? "exam-system-client";
-        var expiryMinutesStr = _configuration["JwtSettings:AccessTokenExpiryMinutes"];
-        var expiryMinutes = int.TryParse(expiryMinutesStr, out var parsedMinutes) ? parsedMinutes : 15;
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new List<Claim>
+        var claims = new[]
         {
-            new(JwtRegisteredClaimNames.Sub, userId.ToString()),
-            new(ClaimTypes.NameIdentifier, userId.ToString()),
-            new(JwtRegisteredClaimNames.Email, email),
-            new(ClaimTypes.Email, email),
-            new(ClaimTypes.Role, role),
-            new("role", role),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, email),
+            new Claim(ClaimTypes.Role, role),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(expiryMinutes),
-            Issuer = issuer,
-            Audience = audience,
-            SigningCredentials = credentials
-        };
+        var expiryMinutesStr = jwtSettings["AccessTokenExpiryMinutes"] ?? jwtSettings["ExpiryMinutes"];
+        var expiryMinutes = int.TryParse(expiryMinutesStr, out var parsedMinutes) ? parsedMinutes : 15;
 
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
+        var token = new JwtSecurityToken(
+            issuer: jwtSettings["Issuer"] ?? "exam-system",
+            audience: jwtSettings["Audience"] ?? "exam-system-client",
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
+            signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     public string GenerateRefreshToken()

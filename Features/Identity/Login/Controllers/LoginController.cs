@@ -1,7 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using exam_system.Features.Identity.Login.Commands;
+using exam_system.Features.Identity.Login.Orchestrators;
+using exam_system.Features.Identity.Login.ViewModels;
 using exam_system.Features.Shared;
 
 namespace exam_system.Features.Identity.Login.Controllers;
@@ -9,24 +10,18 @@ namespace exam_system.Features.Identity.Login.Controllers;
 [ApiController]
 [Route("api/identity/login")]
 [EnableRateLimiting("identity")]
-public class LoginController : ControllerBase
+public class LoginController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public LoginController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     [HttpPost]
-    [ProducesResponseType(typeof(EndpointResponse<LoginResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(EndpointResponse<LoginResponse>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(EndpointResponse<LoginResponse>), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(EndpointResponse<LoginResponse>), StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
-    public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken ct)
+    public async Task<IActionResult> Login([FromBody] LoginViewModel viewModel, CancellationToken ct)
     {
-        var result = await _mediator.Send(command, ct);
+        var orchestrator = new LoginOrchestrator
+        {
+            Email = viewModel.Email,
+            Password = viewModel.Password
+        };
+
+        var result = await mediator.Send(orchestrator, ct);
 
         if (result.Success && !string.IsNullOrEmpty(result.Data?.RefreshToken))
         {

@@ -1,11 +1,11 @@
 using FluentValidation;
-using exam_system.Features.Identity.Login.Commands;
+using exam_system.Features.Identity.Login.Orchestrators;
 
 namespace exam_system.Features.Identity.Login.Validators;
 
-public class LoginCommandValidator : AbstractValidator<LoginCommand>
+public class LoginOrchestratorValidator : AbstractValidator<LoginOrchestrator>
 {
-    public LoginCommandValidator()
+    public LoginOrchestratorValidator()
     {
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required.")
