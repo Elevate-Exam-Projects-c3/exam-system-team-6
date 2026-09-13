@@ -1,6 +1,10 @@
 using System.Reflection;
+using System.Text;
+using System.Threading.RateLimiting;
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using exam_system.Domain.Entities.Diplomas;
 using exam_system.Persistence;
@@ -25,6 +29,7 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBeh
 
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IVerifyEmailOtpOrchestrator, VerifyEmailOtpOrchestrator>();
 
 var app = builder.Build();
