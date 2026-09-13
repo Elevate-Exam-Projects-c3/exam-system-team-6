@@ -4,8 +4,6 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using exam_system.Domain.Entities.Diplomas;
-
-using exam_system.Features.Diplomas.BrowseDiplomas.Orchestrators;
 using exam_system.Features.Shared;
 
 using exam_system.Features.Diplomas.EnrollDiploma.Orchestrators;
@@ -29,8 +27,6 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddScoped<BrowseDiplomasOrchestratorHandler>();
 
 builder.Services.AddScoped<IUserContext, UserContext>();
 
