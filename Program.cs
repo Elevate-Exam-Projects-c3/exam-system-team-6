@@ -25,7 +25,7 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBeh
 
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IVerifyEmailOtpOrchestrator, VerifyEmailOtpOrchestrator>();
+builder.Services.AddScoped<VerifyEmailOtpOrchestrator>();
 
 var app = builder.Build();
 

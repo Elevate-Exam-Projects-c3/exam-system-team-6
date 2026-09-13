@@ -7,13 +7,15 @@ namespace exam_system.Features.Identity.VerifyEmailOtp.Handlers;
 
 public class VerifyEmailOtpCommandHandler : IRequestHandler<VerifyEmailOtpCommand, RequestResponse<VerifyEmailOtpResponse>>
 {
-    private readonly IVerifyEmailOtpOrchestrator _orchestrator;
+    private readonly VerifyEmailOtpOrchestrator _orchestrator;
 
-    public VerifyEmailOtpCommandHandler(IVerifyEmailOtpOrchestrator orchestrator)
+    public VerifyEmailOtpCommandHandler(VerifyEmailOtpOrchestrator orchestrator)
     {
         _orchestrator = orchestrator;
     }
 
-    public Task<RequestResponse<VerifyEmailOtpResponse>> Handle(VerifyEmailOtpCommand request, CancellationToken cancellationToken)
-        => _orchestrator.VerifyAsync(request, cancellationToken);
+    public async Task<RequestResponse<VerifyEmailOtpResponse>> Handle(VerifyEmailOtpCommand request, CancellationToken cancellationToken)
+    {
+        return await _orchestrator.VerifyEmailOtpAsync(request, cancellationToken);
+    }
 }

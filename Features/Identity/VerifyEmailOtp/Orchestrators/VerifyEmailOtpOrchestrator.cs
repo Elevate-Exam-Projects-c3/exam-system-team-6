@@ -8,31 +8,15 @@ using exam_system.Persistence.DataAccess;
 
 namespace exam_system.Features.Identity.VerifyEmailOtp.Orchestrators;
 
-public interface IVerifyEmailOtpOrchestrator
+public class VerifyEmailOtpOrchestrator(
+    IMediator mediator,
+    IUnitOfWork unitOfWork,
+    IPasswordHasher passwordHasher)
 {
-    Task<RequestResponse<VerifyEmailOtpResponse>> VerifyAsync(VerifyEmailOtpCommand request, CancellationToken cancellationToken);
-}
-
-public class VerifyEmailOtpOrchestrator : IVerifyEmailOtpOrchestrator
-{
-    private readonly IMediator _mediator;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IPasswordHasher _passwordHasher;
-
-    public VerifyEmailOtpOrchestrator(
-        IMediator mediator,
-        IUnitOfWork unitOfWork,
-        IPasswordHasher passwordHasher)
-    {
-        _mediator = mediator;
-        _unitOfWork = unitOfWork;
-        _passwordHasher = passwordHasher;
-    }
-
-    public async Task<RequestResponse<VerifyEmailOtpResponse>> VerifyAsync(VerifyEmailOtpCommand request, CancellationToken cancellationToken)
+    public async Task<RequestResponse<VerifyEmailOtpResponse>> VerifyEmailOtpAsync(VerifyEmailOtpCommand request, CancellationToken cancellationToken)
     {
         // 1. Fetch user and their latest unused OTP via Query
-        var queryResult = await _mediator.Send(new GetUserWithOtpQuery { Email = request.Email }, cancellationToken);
+        var queryResult = await mediator.Send(new GetUserWithOtpQuery { Email = request.Email }, cancellationToken);
         var user = queryResult.User;
         var latestOtp = queryResult.LatestUnusedOtp;
 
@@ -66,11 +50,11 @@ public class VerifyEmailOtpOrchestrator : IVerifyEmailOtpOrchestrator
         }
 
         // 6. Validate OTP against stored hash
-        var isOtpValid = _passwordHasher.Verify(request.Otp, latestOtp.OtpHash);
+        var isOtpValid = passwordHasher.Verify(request.Otp, latestOtp.OtpHash);
         if (!isOtpValid)
         {
             latestOtp.AttemptCount++;
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             if (latestOtp.AttemptCount >= 5)
             {
@@ -86,7 +70,7 @@ public class VerifyEmailOtpOrchestrator : IVerifyEmailOtpOrchestrator
         user.EmailConfirmed = true;
         user.AccountStatus = AccountStatus.Active;
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var responseData = new VerifyEmailOtpResponse
         {
