@@ -17,6 +17,10 @@ public class Quiz : BaseEntity
     public int? MaxAttempts { get; set; }
     public QuizStatus Status { get; set; } = QuizStatus.Draft;
     public DateTime? PublishedAt { get; set; }
+    
+    public DateTime StartDate { get; set; }
+    
+    public DateTime EndDate { get; set; }
 
     // Navigations
     public ICollection<Question> Questions { get; set; } = new List<Question>();

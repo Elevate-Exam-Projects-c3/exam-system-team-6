@@ -22,6 +22,9 @@ public class RegisterController(IMediator mediator) : ControllerBase
             Password = viewModel.Password
         };
 
+        RegisterStudentCommand command,
+        CancellationToken cancellationToken)
+    {
         var result = await mediator.Send(command, cancellationToken);
 
         return StatusCode(
