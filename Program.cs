@@ -15,7 +15,9 @@ using exam_system.Persistence.Context;
 using exam_system.Persistence.DataAccess;
 using exam_system.Common.Services;
 using exam_system.Common.Behaviors;
+using exam_system.Features.Attempts.StartAttempt.Builders;
 using exam_system.Features.Identity.Register.Orchestrators;
+using exam_system.Features.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,9 +30,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddScoped<IUserContext, UserContext>();
+builder.Services.AddMediatR(typeof(Program).Assembly);
 
-builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+builder.Services.AddScoped<IUserContext, UserContext>();
 
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
@@ -39,6 +42,11 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<IOtpService, OtpService>();
 builder.Services.AddScoped<RegisterStudentOrchestrator>();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserContext, UserContext>();
+
+builder.Services.AddScoped<AttemptQuestionBuilder>();
 
 var app = builder.Build();
 
