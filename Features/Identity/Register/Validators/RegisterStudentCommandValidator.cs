@@ -1,9 +1,11 @@
 using FluentValidation;
-using exam_system.Features.Identity.Register.Commands;
+using exam_system.Features.Identity.Register.Orchestrators;
+
 namespace exam_system.Features.Identity.Register.Validators;
-public class RegisterStudentCommandValidator : AbstractValidator<RegisterStudentCommand>
+
+public class RegisterStudentOrchestratorValidator : AbstractValidator<RegisterStudentOrchestrator>
 {
-    public RegisterStudentCommandValidator()
+    public RegisterStudentOrchestratorValidator()
     {
         RuleFor(x => x.FullName)
             .NotEmpty().WithMessage("Full name is required.")

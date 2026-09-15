@@ -8,7 +8,7 @@ namespace exam_system.Features.Diplomas.AdminDeleteDiploma.Controllers;
 
 [ApiController]
 [Route("api/admin/diplomas")]
-//[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin")]
 public class DeleteDiplomaController : ControllerBase
 {
     private readonly IMediator _mediator;

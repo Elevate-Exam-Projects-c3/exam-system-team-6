@@ -1,15 +1,17 @@
 using System.Reflection;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
 using exam_system.Common.Behaviors;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using exam_system.Domain.Entities.Diplomas;
-using exam_system.Features.Shared;
-
+using exam_system.Features.Attempts.StartAttempt.Builders;
+using exam_system.Features.Diplomas.AdminDeleteDiploma.Orchestrators;
 using exam_system.Features.Diplomas.EnrollDiploma.Orchestrators;
 using exam_system.Features.Shared;
 using exam_system.Features.Diplomas.AdminDeleteDiploma.Orchestrators;
@@ -47,9 +49,8 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBeh
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IVerifyEmailOtpOrchestrator, VerifyEmailOtpOrchestrator>();
 builder.Services.AddSingleton<IOtpService, OtpService>();
-builder.Services.AddScoped<RegisterStudentOrchestrator>();
+
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, UserContext>();
@@ -79,8 +80,37 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidAudience = jwtSettings["Audience"] ?? "exam-system-client",
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
+        ClockSkew = TimeSpan.Zero,
+        RoleClaimType = ClaimTypes.Role
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnChallenge = async context =>
+        {
+            context.HandleResponse();
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json";
+
+            var response = EndpointResponse.Fail("Authentication is required to access this resource.", statusCode: StatusCodes.Status401Unauthorized);
+            await context.Response.WriteAsJsonAsync(response);
+        },
+        OnForbidden = async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            context.Response.ContentType = "application/json";
+
+            var response = EndpointResponse.Fail("You are not authorized to perform this action.", statusCode: StatusCodes.Status403Forbidden);
+            await context.Response.WriteAsJsonAsync(response);
+        }
+    };
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
 });
 
 var app = builder.Build();

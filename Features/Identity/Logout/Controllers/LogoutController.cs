@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using exam_system.Features.Identity.Logout.Commands;
 using exam_system.Features.Shared;
@@ -6,6 +7,7 @@ using exam_system.Features.Shared;
 namespace exam_system.Features.Identity.Logout.Controllers;
 
 [ApiController]
+[AllowAnonymous]
 [Route("api/identity/logout")]
 public class LogoutController(IMediator mediator) : ControllerBase
 {

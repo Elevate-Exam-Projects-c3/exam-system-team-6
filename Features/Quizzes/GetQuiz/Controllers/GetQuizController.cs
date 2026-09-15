@@ -2,12 +2,14 @@ using exam_system.Features.Quizzes.GetQuiz.Queries;
 using exam_system.Features.Quizzes.GetQuiz.Responses;
 using exam_system.Features.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace exam_system.Features.Quizzes.GetQuiz.Controllers;
 
 [ApiController]
 [Route("api/quizzes")]
+[Authorize(Roles = "Student")]
 public class GetQuizController(IMediator mediator) : ControllerBase
 {
     [HttpGet("{id}")]

@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using exam_system.Features.Identity.RefreshToken.Orchestrators;
 using exam_system.Features.Shared;
@@ -6,6 +7,7 @@ using exam_system.Features.Shared;
 namespace exam_system.Features.Identity.RefreshToken.Controllers;
 
 [ApiController]
+[AllowAnonymous]
 [Route("api/identity/refresh-token")]
 public class RefreshTokenController(IMediator mediator) : ControllerBase
 {
