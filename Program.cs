@@ -1,12 +1,19 @@
 using System.Reflection;
 using System.Text;
 using System.Threading.RateLimiting;
+using exam_system.Common.Behaviors;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using exam_system.Domain.Entities.Diplomas;
+using exam_system.Features.Shared;
+
+using exam_system.Features.Diplomas.EnrollDiploma.Orchestrators;
+using exam_system.Features.Shared;
+using exam_system.Features.Diplomas.AdminDeleteDiploma.Orchestrators;
+
 using exam_system.Persistence;
 using exam_system.Persistence.Context;
 using exam_system.Persistence.DataAccess;
@@ -14,16 +21,25 @@ using exam_system.Common.Services;
 using exam_system.Common.Behaviors;
 using exam_system.Features.Identity.VerifyEmailOtp.Orchestrators;
 using Microsoft.IdentityModel.Tokens;
+using exam_system.Features.Attempts.StartAttempt.Builders;
+using exam_system.Features.Identity.Register.Orchestrators;
+using exam_system.Features.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddScoped<EnrollDiplomaOrchestratorHandler>();
+builder.Services.AddScoped<DeleteDiplomaOrchestratorHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddPersistenceServices(builder.Configuration);
+builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
+builder.Services.AddMediatR(typeof(Program).Assembly);
+
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+builder.Services.AddScoped<IUserContext, UserContext>();
 
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
@@ -32,6 +48,13 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IVerifyEmailOtpOrchestrator, VerifyEmailOtpOrchestrator>();
+builder.Services.AddSingleton<IOtpService, OtpService>();
+builder.Services.AddScoped<RegisterStudentOrchestrator>();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserContext, UserContext>();
+
+builder.Services.AddScoped<AttemptQuestionBuilder>();
 
 // JWT Bearer Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");

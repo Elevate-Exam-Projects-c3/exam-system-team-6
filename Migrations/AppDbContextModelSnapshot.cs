@@ -22,6 +22,42 @@ namespace exam_system.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("exam_system.Domain.Entities.Attempts.AttemptQuestion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttemptId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttemptId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("AttemptQuestions");
+                });
+
             modelBuilder.Entity("exam_system.Domain.Entities.Attempts.QuizAttempt", b =>
                 {
                     b.Property<Guid>("Id")
@@ -521,6 +557,9 @@ namespace exam_system.Migrations
                     b.Property<int>("DurationMinutes")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Instructions")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
@@ -535,6 +574,9 @@ namespace exam_system.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
@@ -553,6 +595,25 @@ namespace exam_system.Migrations
                     b.HasIndex("DiplomaId");
 
                     b.ToTable("Quizzes", (string)null);
+                });
+
+            modelBuilder.Entity("exam_system.Domain.Entities.Attempts.AttemptQuestion", b =>
+                {
+                    b.HasOne("exam_system.Domain.Entities.Attempts.QuizAttempt", "Attempt")
+                        .WithMany()
+                        .HasForeignKey("AttemptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("exam_system.Domain.Entities.Quizzes.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Attempt");
+
+                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("exam_system.Domain.Entities.Attempts.QuizAttempt", b =>
