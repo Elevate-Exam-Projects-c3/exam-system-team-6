@@ -1,21 +1,31 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 
 namespace exam_system.Features.Shared;
 
-public class UserContext(IHttpContextAccessor httpContextAccessor) : IUserContext
+public class UserContext : IUserContext
 {
-    public Guid UserId
-    {
-        get
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+
+    public UserContext(IHttpContextAccessor httpContextAccessor)
         {
-            var userId = httpContextAccessor.HttpContext?
-                .User
-                .FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userId))
-                throw new UnauthorizedAccessException("User is not authenticated.");
-
-            return Guid.Parse(userId);
+        _httpContextAccessor = httpContextAccessor;
         }
+
+
+    public Guid GetUserId()
+    {
+        var userId = _httpContextAccessor.HttpContext?
+            .User
+            .FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userId, out var parsedUserId))
+        {
+            throw new UnauthorizedAccessException("User is not authenticated.");
+        }
+
+        return parsedUserId;
     }
+
+
 }

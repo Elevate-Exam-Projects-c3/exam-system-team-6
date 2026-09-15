@@ -4,6 +4,12 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using exam_system.Domain.Entities.Diplomas;
+using exam_system.Features.Shared;
+
+using exam_system.Features.Diplomas.EnrollDiploma.Orchestrators;
+using exam_system.Features.Shared;
+using exam_system.Features.Diplomas.AdminDeleteDiploma.Orchestrators;
+
 using exam_system.Persistence;
 using exam_system.Persistence.Context;
 using exam_system.Persistence.DataAccess;
@@ -16,14 +22,18 @@ using exam_system.Features.Shared;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddScoped<EnrollDiplomaOrchestratorHandler>();
+builder.Services.AddScoped<DeleteDiplomaOrchestratorHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddPersistenceServices(builder.Configuration);
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddMediatR(typeof(Program).Assembly);
 
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+builder.Services.AddScoped<IUserContext, UserContext>();
 
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
