@@ -1,5 +1,5 @@
-using exam_system.Features.Quizzes.GetQuiz.Dtos;
 using exam_system.Features.Quizzes.GetQuiz.Queries;
+using exam_system.Features.Quizzes.GetQuiz.Responses;
 using exam_system.Features.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +15,7 @@ public class GetQuizController(IMediator mediator) : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        var query = new GetQuizQueryRequest(id);
+        var query = new GetQuizByIdQuery(id);
         var result = await mediator.Send(query, cancellationToken);
 
         return StatusCode(

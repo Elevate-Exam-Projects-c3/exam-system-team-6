@@ -1,4 +1,4 @@
-namespace exam_system.Features.Quizzes.GetQuiz.Dtos;
+namespace exam_system.Features.Quizzes.GetQuiz.Responses;
 
 public class GetQuizQueryDto
 {

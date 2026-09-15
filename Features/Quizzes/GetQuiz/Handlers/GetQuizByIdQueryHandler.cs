@@ -1,15 +1,15 @@
 using exam_system.Domain.Entities.Quizzes;
-using exam_system.Features.Quizzes.GetQuiz.Dtos;
 using exam_system.Features.Quizzes.GetQuiz.Queries;
+using exam_system.Features.Quizzes.GetQuiz.Responses;
 using exam_system.Features.Shared;
 using exam_system.Persistence.DataAccess;
 using MediatR;
 
 namespace exam_system.Features.Quizzes.GetQuiz.Handlers;
 
-public class GetQuizQueryHandler(IGenericRepository<Quiz> repository) : IRequestHandler<GetQuizQueryRequest, RequestResponse<GetQuizQueryDto>>
+public class GetQuizByIdQueryHandler(IGenericRepository<Quiz> repository) : IRequestHandler<GetQuizByIdQuery, RequestResponse<GetQuizQueryDto>>
 {
-    public async Task<RequestResponse<GetQuizQueryDto>> Handle(GetQuizQueryRequest request, CancellationToken cancellationToken)
+    public async Task<RequestResponse<GetQuizQueryDto>> Handle(GetQuizByIdQuery request, CancellationToken cancellationToken)
     {
         var quiz = await repository.GetByIdAsync(request.QuizId);
 

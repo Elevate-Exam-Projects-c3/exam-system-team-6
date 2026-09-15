@@ -32,6 +32,8 @@ public class AppDbContext : DbContext
 
     // Attempt Engine
     public DbSet<QuizAttempt> QuizAttempts => Set<QuizAttempt>();
+    
+    public DbSet<AttemptQuestion> AttemptQuestions => Set<AttemptQuestion>();
     public DbSet<StudentQuestionAnswer> StudentQuestionAnswers => Set<StudentQuestionAnswer>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
