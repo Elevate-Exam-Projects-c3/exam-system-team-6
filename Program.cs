@@ -1,7 +1,11 @@
 using System.Reflection;
+using System.Text;
+using System.Threading.RateLimiting;
 using exam_system.Common.Behaviors;
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using exam_system.Domain.Entities.Diplomas;
 using exam_system.Features.Shared;
@@ -15,6 +19,8 @@ using exam_system.Persistence.Context;
 using exam_system.Persistence.DataAccess;
 using exam_system.Common.Services;
 using exam_system.Common.Behaviors;
+using exam_system.Features.Identity.VerifyEmailOtp.Orchestrators;
+using Microsoft.IdentityModel.Tokens;
 using exam_system.Features.Attempts.StartAttempt.Builders;
 using exam_system.Features.Identity.Register.Orchestrators;
 using exam_system.Features.Shared;
@@ -40,6 +46,8 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBeh
 
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IVerifyEmailOtpOrchestrator, VerifyEmailOtpOrchestrator>();
 builder.Services.AddSingleton<IOtpService, OtpService>();
 builder.Services.AddScoped<RegisterStudentOrchestrator>();
 
@@ -47,6 +55,33 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, UserContext>();
 
 builder.Services.AddScoped<AttemptQuestionBuilder>();
+
+// JWT Bearer Authentication
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secret = jwtSettings["Secret"] ?? jwtSettings["Key"]
+    ?? throw new InvalidOperationException("JwtSettings:Secret is not configured.");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+        ValidateIssuer = true,
+        ValidIssuer = jwtSettings["Issuer"] ?? "exam-system",
+        ValidateAudience = true,
+        ValidAudience = jwtSettings["Audience"] ?? "exam-system-client",
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
 var app = builder.Build();
 
@@ -78,6 +113,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Test Minimal API Endpoint to verify database access and generic repository
