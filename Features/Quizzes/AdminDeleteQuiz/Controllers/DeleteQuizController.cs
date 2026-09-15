@@ -1,14 +1,16 @@
-﻿using exam_system.Features.Quizzes.AdminDeleteQuiz.Commands;
+using exam_system.Features.Quizzes.AdminDeleteQuiz.Commands;
 using exam_system.Features.Quizzes.AdminUpdateQuiz.Commands;
 using exam_system.Features.Quizzes.AdminUpdateQuiz.Dtos;
 using exam_system.Features.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace exam_system.Features.Quizzes.AdminDeleteQuiz.Controllers;
 
 [ApiController]
 [Route("api/quizzes")]
+[Authorize(Roles = "Admin")]
 public class DeleteQuizController(IMediator mediator) : ControllerBase
 {
     [HttpDelete("{id:guid}")]

@@ -1,12 +1,14 @@
-﻿using exam_system.Features.Quizzes.AdminCreateQuiz.Commands;
+using exam_system.Features.Quizzes.AdminCreateQuiz.Commands;
 using exam_system.Features.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace exam_system.Features.Quizzes.AdminCreateQuiz.Controllers;
 
 [ApiController]
 [Route("api/quizzes")]
+[Authorize(Roles = "Admin")]
 public class CreateQuizController(IMediator mediator) : ControllerBase
 {
     [HttpPost]

@@ -1,13 +1,15 @@
-﻿using exam_system.Features.Attempts.StartAttempt.Orchestrators;
+using exam_system.Features.Attempts.StartAttempt.Orchestrators;
 using exam_system.Features.Attempts.StartAttempt.Responses;
 using exam_system.Features.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace exam_system.Features.Attempts.StartAttempt.Controllers;
 
 [ApiController]
 [Route("api/quizzes")]
+[Authorize(Roles = "Student")]
 public class StartQuizAttemptController(IMediator mediator) : ControllerBase
 {
     [HttpPost("{id}/start-attempt")]

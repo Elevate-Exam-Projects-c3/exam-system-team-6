@@ -10,7 +10,7 @@ namespace exam_system.Features.Diplomas.BrowseDiplomas.Controllers;
 
 [ApiController]
 [Route("api/diplomas")]
-//[Authorize(Roles = "Student")]
+[Authorize(Roles = "Student")]
 public class BrowseDiplomasController : ControllerBase
 {
     private readonly IMediator _mediator;

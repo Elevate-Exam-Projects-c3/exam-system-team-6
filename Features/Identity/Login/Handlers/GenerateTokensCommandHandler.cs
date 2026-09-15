@@ -7,6 +7,8 @@ using exam_system.Persistence.DataAccess;
 
 namespace exam_system.Features.Identity.Login.Handlers;
 
+using RefreshToken = exam_system.Domain.Entities.Identity.RefreshToken;
+
 public class GenerateTokensCommandHandler : IRequestHandler<GenerateTokensCommand, GenerateTokensResult>
 {
     private readonly IJwtService _jwtService;
