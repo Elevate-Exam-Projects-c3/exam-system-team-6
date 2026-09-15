@@ -6,46 +6,39 @@ using MediatR;
 
 namespace exam_system.Features.Quizzes.AdminManageQuestions.Handlers;
 
-public class CreateQuestionCommandHandler(
-    IGenericRepository<Quiz> quizRepository,
-    IGenericRepository<Question> questionRepository,
-    IUnitOfWork unitOfWork)
+public class CreateQuestionCommandHandler
     : IRequestHandler<CreateQuestionCommand, RequestResponse<Guid>>
 {
-    public async Task<RequestResponse<Guid>> Handle(CreateQuestionCommand request, CancellationToken cancellationToken)
+    private readonly IGenericRepository<Question> _questionRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public CreateQuestionCommandHandler(
+        IGenericRepository<Question> questionRepository,
+        IUnitOfWork unitOfWork)
     {
-        var quiz = await quizRepository.GetByIdAsync(request.QuizId);
+        _questionRepository = questionRepository;
+        _unitOfWork = unitOfWork;
+    }
 
-        if (quiz is null)
-        {
-            return RequestResponse<Guid>.Fail(
-                "Quiz not found",
-                404);
-        }
-
+    public async Task<RequestResponse<Guid>> Handle(
+        CreateQuestionCommand request,
+        CancellationToken cancellationToken)
+    {
         var question = new Question
         {
-            QuizId = quiz.Id,
-            Text = request.Text,
-            Explanation = request.Explanation,
+            QuizId = request.QuizId,
+            Text = request.Text.Trim(),
+            Explanation = string.IsNullOrWhiteSpace(request.Explanation)
+                ? null
+                : request.Explanation.Trim(),
             OrderIndex = request.OrderIndex
         };
 
-        foreach (var option in request.Options)
-        {
-            question.Options.Add(new QuestionOption
-            {
-                OptionText = option.OptionText,
-                IsCorrect = option.IsCorrect
-            });
-        }
-
-        await questionRepository.AddAsync(question);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await _questionRepository.AddAsync(question);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return RequestResponse<Guid>.Created(
             question.Id,
-            "Question created successfully"
-        );
+            "Question created successfully.");
     }
 }

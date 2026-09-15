@@ -3,9 +3,7 @@ using MediatR;
 
 namespace exam_system.Features.Quizzes.AdminManageQuestions.Commands;
 
-public record UpdateQuestionCommand(
+public record CreateQuestionOptionsCommand(
     Guid QuestionId,
-    string Text,
-    string? Explanation,
-    int OrderIndex
+    IReadOnlyList<QuestionOptionInput> Options
 ) : IRequest<RequestResponse>;

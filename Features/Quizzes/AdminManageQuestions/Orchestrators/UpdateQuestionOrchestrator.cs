@@ -11,35 +11,65 @@ public record UpdateQuestionOrchestrator(
     string Text,
     string? Explanation,
     int OrderIndex,
-    List<UpdateQuestionOptionItem> Options) : IRequest<RequestResponse>;
+    IReadOnlyList<QuestionOptionInput> Options
+) : IRequest<RequestResponse>;
 
-/// <summary>Body of PUT /api/quizzes/{quizId}/questions/{questionId}.</summary>
-public class UpdateQuestionRequest
-{
-    public string Text { get; set; } = string.Empty;
-    public string? Explanation { get; set; }
-    public int OrderIndex { get; set; }
-    public List<UpdateQuestionOptionItem> Options { get; set; } = new();
-}
-
-public class UpdateQuestionOrchestratorHandler(IMediator mediator)
+public class UpdateQuestionOrchestratorHandler
     : IRequestHandler<UpdateQuestionOrchestrator, RequestResponse>
 {
-    public async Task<RequestResponse> Handle(UpdateQuestionOrchestrator request, CancellationToken cancellationToken)
-    {
-        // Step 1: verify the question exists under this quiz (business query, not the repository).
-        var question = await mediator.Send(new GetQuestionForManagementQuery(request.QuizId, request.QuestionId), cancellationToken);
+    private readonly IMediator _mediator;
 
-        if (question is null)
+    public UpdateQuestionOrchestratorHandler(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    public async Task<RequestResponse> Handle(
+        UpdateQuestionOrchestrator request,
+        CancellationToken cancellationToken)
+    {
+        var questionResult = await _mediator.Send(
+            new GetQuestionByIdQuery(request.QuestionId),
+            cancellationToken);
+
+        if (!questionResult.Success || questionResult.Data is null)
         {
             return RequestResponse.Fail(
-                "Question not found",
-                404);
+                questionResult.Message,
+                questionResult.StatusCode);
         }
 
-        // Step 2: update the question and replace its options.
-        return await mediator.Send(
-            new UpdateQuestionCommand(request.QuizId, request.QuestionId, request.Text, request.Explanation, request.OrderIndex, request.Options),
+        if (questionResult.Data.QuizId != request.QuizId)
+        {
+            return RequestResponse.Fail(
+                "Question not found in this quiz.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var updateResult = await _mediator.Send(
+            new UpdateQuestionCommand(
+                request.QuestionId,
+                request.Text,
+                request.Explanation,
+                request.OrderIndex),
             cancellationToken);
+
+        if (!updateResult.Success)
+        {
+            return updateResult;
+        }
+
+        var replaceOptionsResult = await _mediator.Send(
+            new ReplaceQuestionOptionsCommand(
+                request.QuestionId,
+                request.Options),
+            cancellationToken);
+
+        if (!replaceOptionsResult.Success)
+        {
+            return replaceOptionsResult;
+        }
+
+        return RequestResponse.Ok("Question updated successfully.");
     }
 }

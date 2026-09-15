@@ -1,30 +1,84 @@
-﻿using exam_system.Features.Quizzes.AdminManageQuestions.Commands;
+﻿using exam_system.Common.Enums;
+using exam_system.Features.Quizzes.AdminManageQuestions.Commands;
 using exam_system.Features.Quizzes.AdminManageQuestions.Queries;
 using exam_system.Features.Shared;
 using MediatR;
 
 namespace exam_system.Features.Quizzes.AdminManageQuestions.Orchestrators;
 
-public record DeleteQuestionOrchestrator(Guid QuizId, Guid QuestionId) : IRequest<RequestResponse>;
+public record DeleteQuestionOrchestrator(
+    Guid QuizId,
+    Guid QuestionId
+) : IRequest<RequestResponse>;
 
-public class DeleteQuestionOrchestratorHandler(IMediator mediator)
+public class DeleteQuestionOrchestratorHandler
     : IRequestHandler<DeleteQuestionOrchestrator, RequestResponse>
 {
-    public async Task<RequestResponse> Handle(DeleteQuestionOrchestrator request, CancellationToken cancellationToken)
-    {
-        // Step 1: verify the question exists under this quiz (business query, not the repository).
-        var question = await mediator.Send(new GetQuestionForManagementQuery(request.QuizId, request.QuestionId), cancellationToken);
+    private readonly IMediator _mediator;
 
-        if (question is null)
+    public DeleteQuestionOrchestratorHandler(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    public async Task<RequestResponse> Handle(
+        DeleteQuestionOrchestrator request,
+        CancellationToken cancellationToken)
+    {
+        var questionResult = await _mediator.Send(
+            new GetQuestionByIdQuery(request.QuestionId),
+            cancellationToken);
+
+        if (!questionResult.Success || questionResult.Data is null)
         {
             return RequestResponse.Fail(
-                "Question not found",
-                404);
+                questionResult.Message,
+                questionResult.StatusCode);
         }
 
-        // Step 2: the publish guard (409) and the soft-delete are enforced inside the command handler.
-        return await mediator.Send(
-            new DeleteQuestionCommand(request.QuizId, request.QuestionId),
+        if (questionResult.Data.QuizId != request.QuizId)
+        {
+            return RequestResponse.Fail(
+                "Question not found in this quiz.",
+                StatusCodes.Status404NotFound);
+        }
+
+        var quizResult = await _mediator.Send(
+            new GetQuizByIdQuery(questionResult.Data.QuizId),
             cancellationToken);
+
+        if (!quizResult.Success || quizResult.Data is null)
+        {
+            return RequestResponse.Fail(
+                quizResult.Message,
+                quizResult.StatusCode);
+        }
+
+        if (quizResult.Data.Status == QuizStatus.Published)
+        {
+            return RequestResponse.Fail(
+                "Cannot delete a question from a published quiz. Unpublish the quiz first.",
+                StatusCodes.Status409Conflict);
+        }
+
+        var deleteResult = await _mediator.Send(
+            new DeleteQuestionCommand(request.QuestionId),
+            cancellationToken);
+
+        if (!deleteResult.Success)
+        {
+            return deleteResult;
+        }
+
+        var deleteOptionsResult = await _mediator.Send(
+            new DeleteQuestionOptionsCommand(request.QuestionId),
+            cancellationToken);
+
+        if (!deleteOptionsResult.Success)
+        {
+            return deleteOptionsResult;
+        }
+
+        return RequestResponse.Ok("Question deleted successfully.");
     }
 }

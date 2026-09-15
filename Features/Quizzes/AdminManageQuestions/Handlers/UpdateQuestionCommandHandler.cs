@@ -6,43 +6,43 @@ using MediatR;
 
 namespace exam_system.Features.Quizzes.AdminManageQuestions.Handlers;
 
-public class UpdateQuestionCommandHandler(
-    IGenericRepository<Question> questionRepository,
-    IGenericRepository<QuestionOption> optionRepository,
-    IUnitOfWork unitOfWork)
+public class UpdateQuestionCommandHandler
     : IRequestHandler<UpdateQuestionCommand, RequestResponse>
 {
-    public async Task<RequestResponse> Handle(UpdateQuestionCommand request, CancellationToken cancellationToken)
-    {
-        var question = await questionRepository.GetByIdAsync(request.QuestionId, q => q.Options);
+    private readonly IGenericRepository<Question> _questionRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-        if (question is null || question.QuizId != request.QuizId)
+    public UpdateQuestionCommandHandler(
+        IGenericRepository<Question> questionRepository,
+        IUnitOfWork unitOfWork)
+    {
+        _questionRepository = questionRepository;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<RequestResponse> Handle(
+        UpdateQuestionCommand request,
+        CancellationToken cancellationToken)
+    {
+        var question = await _questionRepository.GetByIdAsync(request.QuestionId);
+
+        if (question is null || question.IsDeleted)
         {
             return RequestResponse.Fail(
-                "Question not found",
-                404);
+                "Question not found.",
+                StatusCodes.Status404NotFound);
         }
 
-        question.Text = request.Text;
-        question.Explanation = request.Explanation;
+        question.Text = request.Text.Trim();
+        question.Explanation = string.IsNullOrWhiteSpace(request.Explanation)
+            ? null
+            : request.Explanation.Trim();
         question.OrderIndex = request.OrderIndex;
+        question.UpdatedAt = DateTime.UtcNow;
 
-        // Full replacement of the option set:
-        // soft-delete the old options, then insert the new ones in the same unit of work.
-        optionRepository.DeleteRange(question.Options);
+        _questionRepository.Update(question);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var newOptions = request.Options.Select(o => new QuestionOption
-        {
-            QuestionId = question.Id,
-            OptionText = o.OptionText,
-            IsCorrect = o.IsCorrect
-        }).ToList();
-
-        await optionRepository.AddRangeAsync(newOptions);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        return RequestResponse.Ok(
-            "Question updated successfully"
-        );
+        return RequestResponse.Ok("Question updated successfully.");
     }
 }
