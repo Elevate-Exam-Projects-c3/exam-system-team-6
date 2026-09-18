@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace exam_system.Features.Diplomas.AdminDeleteDiploma.Orchestrators;
 
 public class DeleteDiplomaOrchestratorHandler
+    : IRequestHandler<DeleteDiplomaOrchestrator, RequestResponse>
 {
     private readonly IMediator _mediator;
 
