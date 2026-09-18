@@ -14,16 +14,16 @@ public class VerifyEmailOtpOrchestratorHandler
     : IRequestHandler<VerifyEmailOtpOrchestrator, RequestResponse<VerifyEmailOtpResponse>>
 {
     private readonly IMediator _mediator;
-    private readonly IPasswordHasher _passwordHasher;
+    private readonly IOtpService _otpService;
     private readonly IUnitOfWork _unitOfWork;
 
     public VerifyEmailOtpOrchestratorHandler(
         IMediator mediator,
-        IPasswordHasher passwordHasher,
+        IOtpService otpService,
         IUnitOfWork unitOfWork)
     {
         _mediator = mediator;
-        _passwordHasher = passwordHasher;
+        _otpService = otpService;
         _unitOfWork = unitOfWork;
     }
 
@@ -65,7 +65,7 @@ public class VerifyEmailOtpOrchestratorHandler
         }
 
         // 6. Validate OTP against stored hash
-        var isOtpValid = _passwordHasher.Verify(request.Otp, latestOtp.OtpHash);
+        var isOtpValid = _otpService.VerifyOtp(request.Otp, latestOtp.OtpHash);
         if (!isOtpValid)
         {
             latestOtp.AttemptCount++;
