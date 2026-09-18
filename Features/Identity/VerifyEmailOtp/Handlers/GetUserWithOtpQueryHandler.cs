@@ -19,28 +19,21 @@ public class GetUserWithOtpQueryHandler : IRequestHandler<GetUserWithOtpQuery, G
     {
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
 
-        var user = await _userRepo.Get(u => u.Email.ToLower() == normalizedEmail)
-                                  .Include(u => u.EmailVerificationOtps)
-                                  .FirstOrDefaultAsync(cancellationToken);
+        var result = await _userRepo.Get(u => u.Email.ToLower() == normalizedEmail)
+                                    .Select(u => new GetUserWithOtpQueryResult
+                                    {
+                                        User = u,
+                                        LatestUnusedOtp = u.EmailVerificationOtps
+                                                           .Where(o => !o.IsUsed)
+                                                           .OrderByDescending(o => o.CreatedAt)
+                                                           .FirstOrDefault()
+                                    })
+                                    .FirstOrDefaultAsync(cancellationToken);
 
-        if (user == null)
+        return result ?? new GetUserWithOtpQueryResult
         {
-            return new GetUserWithOtpQueryResult
-            {
-                User = null,
-                LatestUnusedOtp = null
-            };
-        }
-
-        var latestOtp = user.EmailVerificationOtps
-            .Where(o => !o.IsUsed)
-            .OrderByDescending(o => o.CreatedAt)
-            .FirstOrDefault();
-
-        return new GetUserWithOtpQueryResult
-        {
-            User = user,
-            LatestUnusedOtp = latestOtp
+            User = null,
+            LatestUnusedOtp = null
         };
     }
 }
