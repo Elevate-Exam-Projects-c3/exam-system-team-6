@@ -10,5 +10,9 @@ public class ViewAttemptResultsOrchestratorValidator : AbstractValidator<ViewAtt
         RuleFor(x => x.AttemptId)
             .NotEmpty()
             .WithMessage("Attempt ID is required.");
+
+        RuleFor(x => x.StudentId)
+            .NotEmpty()
+            .WithMessage("Student ID is required.");
     }
 }

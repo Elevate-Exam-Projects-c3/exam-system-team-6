@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using exam_system.Features.Attempts.GetAttemptResults.Dtos;
 using exam_system.Features.Attempts.GetAttemptResults.Orchestrators;
 using exam_system.Features.Shared;
@@ -17,7 +18,8 @@ public class ViewAttemptResultsController(IMediator mediator) : ControllerBase
         Guid attemptId,
         CancellationToken cancellationToken)
     {
-        var orchestrator = new ViewAttemptResultsOrchestrator(attemptId);
+        var callerUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var orchestrator = new ViewAttemptResultsOrchestrator(attemptId, callerUserId);
         var result = await mediator.Send(orchestrator, cancellationToken);
         var response = EndpointResponse<AttemptResultDto>.FromResult(result);
         return StatusCode(response.StatusCode, response);

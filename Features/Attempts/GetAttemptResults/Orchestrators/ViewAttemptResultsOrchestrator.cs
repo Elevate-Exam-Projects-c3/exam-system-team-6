@@ -4,4 +4,6 @@ using MediatR;
 
 namespace exam_system.Features.Attempts.GetAttemptResults.Orchestrators;
 
-public record ViewAttemptResultsOrchestrator(Guid AttemptId) : IRequest<RequestResponse<AttemptResultDto>>;
+public record ViewAttemptResultsOrchestrator(
+    Guid AttemptId,
+    Guid StudentId) : IRequest<RequestResponse<AttemptResultDto>>;

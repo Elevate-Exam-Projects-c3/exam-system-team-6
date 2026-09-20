@@ -7,17 +7,13 @@ using MediatR;
 
 namespace exam_system.Features.Attempts.GetAttemptResults.Handlers;
 
-public class ViewAttemptResultsOrchestratorHandler(
-    IMediator mediator,
-    IUserContext userContext)
+public class ViewAttemptResultsOrchestratorHandler(IMediator mediator)
     : IRequestHandler<ViewAttemptResultsOrchestrator, RequestResponse<AttemptResultDto>>
 {
     public async Task<RequestResponse<AttemptResultDto>> Handle(
         ViewAttemptResultsOrchestrator request,
         CancellationToken cancellationToken)
     {
-        var currentUserId = userContext.GetUserId();
-
         // 1. Fetch attempt summary
         var summary = await mediator.Send(
             new GetAttemptSummaryQuery(request.AttemptId),
@@ -28,15 +24,15 @@ public class ViewAttemptResultsOrchestratorHandler(
             return RequestResponse<AttemptResultDto>.Fail("Attempt not found.", 404);
         }
 
-        // 2. Ownership check: Student can only view their own attempts (403 IDOR protection)
-        if (summary.StudentUserId != currentUserId && summary.StudentId != currentUserId)
+        // 2. Student can only view their own attempts
+        if (summary.StudentUserId != request.StudentId && summary.StudentId != request.StudentId)
         {
             return RequestResponse<AttemptResultDto>.Fail(
                 "You are not authorized to view this attempt's results.",
                 403);
         }
 
-        // 3. Status check: Available only once Status = Submitted or TimedOut (reject InProgress with 400)
+        // 3. Status check: Available only once Status = Submitted or TimedOut
         if (summary.Status == AttemptStatus.InProgress)
         {
             return RequestResponse<AttemptResultDto>.Fail(
