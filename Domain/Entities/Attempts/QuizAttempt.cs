@@ -22,4 +22,9 @@ public class QuizAttempt : BaseEntity
 
     // Navigations
     public ICollection<StudentQuestionAnswer> Answers { get; set; } = new List<StudentQuestionAnswer>();
+    
+    public void MarkAsTimedOut()
+    {
+        Status = AttemptStatus.TimedOut;
+    }
 }
